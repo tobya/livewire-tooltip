@@ -1,5 +1,5 @@
 {
-    "name": "5balloons/livewire-tooltip",
+    "name": "tobya/5balloons-livewire-tooltip",
     "description": "A dynamic tooltip component using laravel livewire",
     "type": "library",
     "license": "MIT",
