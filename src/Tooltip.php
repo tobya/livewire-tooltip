@@ -66,61 +66,66 @@ class Tooltip extends Component
             </div>
             @script
             <script>
-                 let tooltipLinks = document.querySelectorAll('.tooltip-link');
+                const container = document.querySelector('body');
+                let tooltipLinks = document.querySelectorAll('.tooltip-link');
                 let tooltip = document.getElementById('tooltip');
                 let popperInstance = null;
 
                 tooltipLinks.forEach(el => {
-                    el.addEventListener('mouseover', event => {
-                        let placement = event.target.getAttribute('data-placement') || 'top'; // Default to 'top' if not specified
+                    container.addEventListener('mouseover', event => {
+                        if (event.target.classList.contains('tooltip-link')) {
+                                let placement = event.target.getAttribute('data-placement') || 'top'; // Default to 'top' if not specified
 
-                        const popperInstance = Popper.createPopper(event.target, tooltip, {
-                            placement: placement,
-                            modifiers: [
-                                {
-                                    name: 'offset',
-                                    options: {
-                                        offset: [0, 8], // Adjust based on your needs
-                                    },
-                                },
-                            ],
-                        });
+                                const popperInstance = Popper.createPopper(event.target, tooltip, {
+                                    placement: placement,
+                                    modifiers: [
+                                        {
+                                            name: 'offset',
+                                            options: {
+                                                offset: [0, 8], // Adjust based on your needs
+                                            },
+                                        },
+                                    ],
+                                });
 
-                        // Function to show tooltip
-                        function showTooltip() {
-                            tooltip.setAttribute('data-show', '');
-                            tooltip.classList.remove('hidden');
-                            popperInstance.update();
+                                // Function to show tooltip
+                                function showTooltip() {
+                                    tooltip.setAttribute('data-show', '');
+                                    tooltip.classList.remove('hidden');
+                                    popperInstance.update();
+                                }
+
+                                // Function to hide tooltip
+                                function hideTooltip() {
+                                    tooltip.removeAttribute('data-show');
+                                    tooltip.classList.add('hidden');
+                                    if (popperInstance) {
+                                        popperInstance.destroy();
+                                    }
+                                }
+
+                                let classAndMethod = event.target.getAttribute('tooltip-method');
+                                let params = {};
+                                Object.entries(event.target.dataset).forEach(([key, value]) => {
+                                    if (key.startsWith('param')) {
+                                        params[key] = value;
+                                    }
+                                });
+
+
+                                // Dispatch event to fetch content
+                                Livewire.dispatchTo('livewire-tooltip', 'tooltip-mouseover', {classAndMethod : classAndMethod, parameters: params});
+
+                                // Show the tooltip
+                                showTooltip();
+
+                                container.addEventListener('mouseout', event => {
+                                    // Hide the tooltip
+                                    if (event.target.classList.contains('tooltip-link')) {
+                                         hideTooltip();
+                                    }
+                                });
                         }
-
-                        // Function to hide tooltip
-                        function hideTooltip() {
-                            tooltip.removeAttribute('data-show');
-                            tooltip.classList.add('hidden');
-                            if (popperInstance) {
-                                popperInstance.destroy();
-                            }
-                        }
-
-                        let classAndMethod = event.target.getAttribute('tooltip-method');
-                        let params = {};
-                        Object.entries(event.target.dataset).forEach(([key, value]) => {
-                            if (key.startsWith('param')) {
-                                params[key] = value;
-                            }
-                        });
-
-
-                        // Dispatch event to fetch content
-                        Livewire.dispatchTo('livewire-tooltip', 'tooltip-mouseover', {classAndMethod : classAndMethod, parameters: params});
-
-                        // Show the tooltip
-                        showTooltip();
-
-                        el.addEventListener('mouseout', event => {
-                            // Hide the tooltip
-                            hideTooltip();
-                        });
 
                     });
 
@@ -142,7 +147,7 @@ class Tooltip extends Component
         
         //try{
             // Check if the class and method is callable
-            if (is_callable([$className, $methodName])) {
+            if (is_callable([$className, $methodName]) && $methodName == 'tooltip') {
 
                 $paramValues = array_values($parameters);
                 // Call the static method dynamically and store the result
