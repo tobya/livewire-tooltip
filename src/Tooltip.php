@@ -99,6 +99,7 @@ class Tooltip extends Component
                                 function hideTooltip() {
                                     tooltip.removeAttribute('data-show');
                                     tooltip.classList.add('hidden');
+                                    tooltip.innerHTML = '';
                                     if (popperInstance) {
                                         popperInstance.destroy();
                                     }
